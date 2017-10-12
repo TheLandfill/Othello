@@ -137,6 +137,7 @@ public class Game {
 							try {
 								numIterations = Integer.parseInt(strIterations);
 								if (numIterations > 0) {
+									listOfSpread = new ArrayList<Integer>(numIterations);
 									break;
 								}
 							} catch (NumberFormatException e) {
@@ -158,29 +159,28 @@ public class Game {
 
 			boolean validMovesLastPlayer = true;
 			for (int i = 0, maxTurns = 60; i < maxTurns; i++) {
-				boolean validMovesCurrPlayer = gameBoard.checkAnyValidMoves(playersC[i % 2].getColor());
-
 				/*
 				 * This next if block determines if the game should end because neither player
 				 * has a valid move.
 				 */
-				if ((!validMovesCurrPlayer) && (validMovesLastPlayer)) {
-					if (!simulation) {
-						switch (i % 2) {
-						case 0:
-							System.out.println("Black has no valid moves and was forced to\npass.");
-							break;
-						case 1:
-							System.out.println("White has no valid moves and was forced to\npass.");
-							break;
+				if ((!gameBoard.checkAnyValidMoves(playersC[i % 2].getColor()))) {
+					if (validMovesLastPlayer) {
+						if (!simulation) {
+							switch (i % 2) {
+							case 0:
+								System.out.println("Black has no valid moves and was forced to\npass.");
+								break;
+							case 1:
+								System.out.println("White has no valid moves and was forced to\npass.");
+								break;
+							}
 						}
+						validMovesLastPlayer = false;
+						maxTurns++;
+						continue;
+					} else {
+						break;
 					}
-					validMovesLastPlayer = false;
-					maxTurns++;
-					continue;
-				} else if ((!validMovesCurrPlayer) && (!validMovesLastPlayer)) {
-					// Ends the game if neither player has a valid move
-					break;
 				} else {
 					// Resets valid moves to be true if the current player has a valid move
 					validMovesLastPlayer = true;

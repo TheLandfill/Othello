@@ -1,6 +1,7 @@
 package othello;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Scanner;
  */
 public class AI implements Player {
 	private Color color;
-
+	private Random r;
 	/**
 	 * Creates an AI with color c
 	 * 
@@ -20,6 +21,7 @@ public class AI implements Player {
 	 */
 	public AI(Color c) {
 		color = c;
+		r = new Random();
 	}
 
 	@Override
@@ -33,7 +35,9 @@ public class AI implements Player {
 			playerInput.nextLine();
 		}
 		ArrayList<String> validMoves = gB.getValidMoves(getColor());
-		int randMove = (int) (Math.random() * validMoves.size());
-		return validMoves.get(randMove);
+		int randMove = r.nextInt(validMoves.size());
+		String move = validMoves.get(randMove);
+		validMoves.removeAll(validMoves);
+		return move;
 	}
 }

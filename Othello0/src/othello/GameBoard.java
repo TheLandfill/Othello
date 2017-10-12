@@ -50,20 +50,6 @@ public class GameBoard {
 		return (row < BOARD_WIDTH) && (row >= 0) && (column < BOARD_HEIGHT) && (column >= 0);
 	}
 
-	/**
-	 * Tests if the square is filled at "row,column".
-	 * 
-	 * @param row
-	 * @param column
-	 * @return boolean
-	 * @throws ArrayOutofBoundsException
-	 *             if you put in coordinates that aren't on the board, so please
-	 *             don't.
-	 */
-	public boolean isFilled(int row, int column) {
-		return board[row][column] != Color.Empty;
-	}
-
 	private void setCoordinate(int row, int column, Color c) {
 		board[row][column] = c;
 	}
@@ -93,7 +79,7 @@ public class GameBoard {
 		int score = 0;
 		for (int row = 0; row < BOARD_WIDTH; row++) {
 			for (int column = 0; column < BOARD_HEIGHT; column++) {
-				if ((isFilled(row, column)) && (c == getColor(row, column))) {
+				if ((c == getColor(row, column))) {
 					score++;
 				}
 			}
@@ -102,41 +88,28 @@ public class GameBoard {
 	}
 
 	private boolean checkDirection(int row, int column, Color c, int direction) {
-		Color opposite = c.getOpposite();
-		int drow = DIRECTIONS[2 * direction];
-		int dcolumn = DIRECTIONS[(2 * direction) + 1];
-
-		int curRow = row;
-		int curCol = column;
-
-		if (getColor(curRow, curCol) != Color.Empty) {
+		if (getColor(row, column) != Color.Empty) {
+			return false;
+		}
+		
+		row += DIRECTIONS[2 * direction];
+		column += DIRECTIONS[(2 * direction) + 1];
+		
+		if (!isOnBoard(row, column)) {
 			return false;
 		}
 
-		curRow += drow;
-		curCol += dcolumn;
-
-		if (!isOnBoard(curRow, curCol)) {
-			return false;
-		}
-
-		Color curColor = getColor(curRow, curCol);
-		boolean streak = false;
-		while (isOnBoard(curRow, curCol) && curColor == opposite) {
-			streak = true;
-			curRow += drow;
-			curCol += dcolumn;
-			if (!isOnBoard(curRow, curCol)) {
+		while (isOnBoard(row, column) && getColor(row, column) == c.getOpposite()) {
+			row += DIRECTIONS[2 * direction];
+			column += DIRECTIONS[(2 * direction) + 1];
+			if (!isOnBoard(row, column)) {
 				return false;
 			}
-			curColor = getColor(curRow, curCol);
+			if (getColor(row, column) == c) {
+				return true;
+			}
 		}
-
-		if ((curColor == c) && (streak)) {
-			return true;
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -148,7 +121,7 @@ public class GameBoard {
 	 * @return boolean
 	 */
 	public boolean isValidMove(int row, int column, Color c) {
-		if (!isOnBoard(row, column)) {
+		if (!isOnBoard(row, column) || getColor(row, column) != Color.Empty) {
 			return false;
 		}
 
@@ -176,12 +149,10 @@ public class GameBoard {
 				int curRow = row + drow;
 				int curCol = column + dcolumn;
 
-				Color curColor = getColor(curRow, curCol);
-				while (isOnBoard(curRow, curCol) && curColor != c) {
+				while (isOnBoard(curRow, curCol) && getColor(curRow, curCol) != c) {
 					setCoordinate(curRow, curCol, c);
 					curRow += drow;
 					curCol += dcolumn;
-					curColor = getColor(curRow, curCol);
 				}
 			}
 		}
@@ -198,14 +169,16 @@ public class GameBoard {
 	public boolean checkAnyValidMoves(Color c) {
 		for (int row = 0; row < BOARD_HEIGHT; row++) {
 			for (int column = 0; column < BOARD_WIDTH; column++) {
-				if (isValidMove(row, column, c)) {
+				if (getColor(row, column) != Color.Empty) {
+					continue;
+				} else if (isValidMove(row, column, c)) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Finds all the valid moves on the board for a Color c
 	 * 
@@ -213,15 +186,14 @@ public class GameBoard {
 	 * @return list of Strings
 	 */
 	public ArrayList<String> getValidMoves(Color c) {
-		ArrayList<String> validMoves = new ArrayList<String>(60);
+		ArrayList<String> validMoves = new ArrayList<String>(28);
 		for (int row = 0; row < BOARD_HEIGHT; row++) {
 			for (int column = 0; column < BOARD_WIDTH; column++) {
 				if (isValidMove(row, column, c)) {
-					validMoves.set(8 * row + column, row + "," + column);
+					validMoves.add(row + "," + column);
 				}
 			}
 		}
-		validMoves.trimToSize();
 		return validMoves;
 	}
 
